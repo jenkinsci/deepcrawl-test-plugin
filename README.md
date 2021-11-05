@@ -1,4 +1,4 @@
-# deepcrawl-test
+# Deepcrawl Automation Hub Jenkins Plugin
 
 ## Introduction
 
@@ -29,6 +29,8 @@ pipeline {
 ```
 
 It can also be configured as a Build Step using the Jenkins GUI.
+
+**For other ways to trigger an Automation Hub Build please see: https://github.com/deepcrawl/deepcrawl-test**
 
 ## LICENSE
 
