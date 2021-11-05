@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+    Runs a build on Automation Hub, in order to execute the configured tests.
+</div>

@@ -1,0 +1,17 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="Test Suite ID" field="testSuiteId">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="User Key ID" field="userKeyId" description="Can also be set via DEEPCRAWL_AUTOMATION_HUB_USER_KEY_ID environment variable">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="User Key Secret" field="userKeySecret" description="Can also be set via DEEPCRAWL_AUTOMATION_HUB_USER_KEY_SECRET environment variable">
+        <f:textbox />
+    </f:entry>
+    <f:advanced>
+        <f:entry title="Only start the build." field="startOnly" description="Only starts the build without polling for it to finish succesfully.">
+            <f:checkbox />
+        </f:entry>
+    </f:advanced>
+</j:jelly>
