@@ -1,6 +1,8 @@
 package io.jenkins.plugins.deepcrawltest;
 
 import hudson.Launcher;
+import hudson.Proc;
+import hudson.Launcher.ProcStarter;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -12,16 +14,10 @@ import hudson.tasks.BuildStepDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Locale;
@@ -43,7 +39,7 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
   private final String testSuiteId;
   private String userKeyId;
   private String userKeySecret;
-  private boolean startOnly;
+  private boolean startOnly = false;
 
   @DataBoundConstructor
   public DeepcrawlTestBuilder(String testSuiteId) {
@@ -83,10 +79,16 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
 
   @Override
   public void perform(Run<?, ?> run, FilePath workspace, EnvVars env, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {  
+    String buildId = run.getId();
+    FilePath uniqueWorkspace = workspace.child(buildId);
     OperatingSystem os = this.getOperatingSystem();
-    String cliFilename = this.downloadCLIExecutable(os);
+    FilePath cliFile = this.downloadCLIExecutable(uniqueWorkspace, os);
     PrintStream logger = listener.getLogger();
-    this.execCommand(cliFilename, env, logger);
+    String[] command = this.getCommand(cliFile, buildId, env);
+    ProcStarter procStarter = launcher.launch();
+    Proc process = procStarter.pwd(uniqueWorkspace).cmds(command).quiet(true).stderr(logger).stdout(logger).start();
+    int exitCode = process.join();
+    if (exitCode != 0) throw new DeepcrawlTestExitException(exitCode);
   }
 
   private OperatingSystem getOperatingSystem() throws OperatingSystemNotSupportedException {
@@ -97,56 +99,34 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
     throw new OperatingSystemNotSupportedException();
   }
 
-  private String downloadCLIExecutable(OperatingSystem os) throws IOException {
+  private FilePath downloadCLIExecutable(FilePath workspace, OperatingSystem os) throws IOException, InterruptedException {
     String cliFilename = CLI_FILENAME.get(os);
     String cliDownloadUrl = this.getCLIDownloadUrl(cliFilename);
-    this.downloadFile(cliDownloadUrl, cliFilename);
-    return cliFilename;
+    return this.downloadFile(workspace, cliFilename, cliDownloadUrl);
   }
 
   private String getCLIDownloadUrl(String cliFilename) {
     return CLI_DOWNLOAD_URL.replace("${cliVersion}", CLI_VERSION).replace("${cliFilename}", cliFilename);
   }
 
-  private void downloadFile(String cliUrl, String cliFilename) throws IOException {
+  private FilePath downloadFile(FilePath workspace, String cliFilename, String cliUrl) throws IOException, InterruptedException {
     InputStream in = new URL(cliUrl).openStream();
-    Path path = Paths.get(System.getProperty("user.dir"), cliFilename);
-    Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
-    path.toFile().setExecutable(true);
+    FilePath filePath = workspace.child(cliFilename);
+    filePath.copyFrom(in);
+    filePath.chmod(0755);
+    return filePath;
   }
 
-  private void execCommand(String cliFilename, EnvVars env, PrintStream logger) throws IOException, InterruptedException {
-    String[] command = this.getCommand(cliFilename, env);
-    Process process = Runtime.getRuntime().exec(command);
-    this.forwardInputStream(process.getErrorStream(), logger);
-    this.forwardInputStream(process.getInputStream(), logger);
-    int exitCode = process.waitFor();
-    if (exitCode != 0) throw new DeepcrawlTestExitException(exitCode);
-  }
-
-  private String[] getCommand(String cliFilename, EnvVars env) {
+  private String[] getCommand(FilePath cliFile, String buildId, EnvVars env) {
     String userKeyId = this.userKeyId != null && !this.userKeyId.isEmpty() ? this.userKeyId : env.get("DEEPCRAWL_AUTOMATION_HUB_USER_KEY_ID", "");
     String userKeySecret = this.userKeySecret != null && !this.userKeySecret.isEmpty() ? this.userKeySecret : env.get("DEEPCRAWL_AUTOMATION_HUB_USER_KEY_SECRET", "");
-    String cliPath = System.getProperty("user.dir") + "/" + cliFilename;
+    String cliPath = "./" + cliFile.getName();
     String testSuiteIdArg = String.format("--testSuiteId=%s", this.testSuiteId);
     String userKeyIdArg = String.format("--userKeyId=%s", userKeyId);
     String userKeySecretArg = String.format("--userKeySecret=%s", userKeySecret);
-    return new String[]{ cliPath, testSuiteIdArg, userKeyIdArg, userKeySecretArg };
-  }
-
-  private void forwardInputStream(InputStream inputStream, PrintStream logger) {
-    new Thread(new Runnable() {
-      public void run() {
-        try {
-          BufferedReader errorStream = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-          String line;
-          while ((line = errorStream.readLine()) != null) logger.println(line);
-          errorStream.close();
-        } catch (IOException e) {
-          logger.println(e.getMessage());
-        }
-      }
-    }).start();
+    String ciBuildIdArg = String.format("--ciBuildId=%s", buildId);
+    String startOnlyArg = String.format("--startOnly=%b", this.startOnly);
+    return new String[]{ cliPath, testSuiteIdArg, userKeyIdArg, userKeySecretArg, ciBuildIdArg, startOnlyArg };
   }
 
   @Symbol("runAutomationHubBuild")
