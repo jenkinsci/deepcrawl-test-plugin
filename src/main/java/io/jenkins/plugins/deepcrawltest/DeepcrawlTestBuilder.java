@@ -12,6 +12,8 @@ import hudson.model.TaskListener;
 import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.util.Secret;
+import io.jenkins.cli.shaded.org.apache.commons.io.output.ByteArrayOutputStream;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -21,7 +23,6 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.Map;
-import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,22 +83,25 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
   public void perform(Run<?, ?> run, FilePath workspace, EnvVars env, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {  
     String buildId = run.getId();
     FilePath uniqueWorkspace = workspace.child(buildId);
-    OperatingSystem os = this.getOperatingSystem();
+    OperatingSystem os = this.getOperatingSystem(workspace, launcher);
     FilePath cliFile = this.downloadCLIExecutable(uniqueWorkspace, os);
-    PrintStream logger = listener.getLogger();
     String[] command = this.getCommand(cliFile, buildId, env);
+    PrintStream logger = listener.getLogger();
     ProcStarter procStarter = launcher.launch();
     Proc process = procStarter.pwd(uniqueWorkspace).cmds(command).quiet(true).stderr(logger).stdout(logger).start();
     int exitCode = process.join();
     if (exitCode != 0) throw new DeepcrawlTestExitException(exitCode);
   }
 
-  private OperatingSystem getOperatingSystem() throws OperatingSystemNotSupportedException {
-    String osname = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-    if (osname.indexOf("mac") >= 0 || osname.indexOf("darwin") >= 0) return OperatingSystem.MACOS;
-    if (osname.indexOf("win") >= 0) return OperatingSystem.WINDOWS;
-    if (osname.indexOf("nux") >= 0) return OperatingSystem.LINUX;
-    throw new OperatingSystemNotSupportedException();
+  private OperatingSystem getOperatingSystem(FilePath workspace, Launcher launcher) throws IOException, InterruptedException {
+    if (!launcher.isUnix()) return OperatingSystem.WINDOWS;
+    ProcStarter procStarter = launcher.launch();
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    Proc process = procStarter.pwd(workspace).cmds("uname").quiet(true).stdout(outputStream).start();
+    process.join();
+    String output = outputStream.toString("UTF-8");
+    if (output.startsWith("Darwin")) return OperatingSystem.MACOS;
+    return OperatingSystem.LINUX;
   }
 
   private FilePath downloadCLIExecutable(FilePath workspace, OperatingSystem os) throws IOException, InterruptedException {
