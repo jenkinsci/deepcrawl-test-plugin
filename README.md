@@ -18,7 +18,7 @@ pipeline {
     }
 
     stages {
-        stage('Hello') {
+        stage('Automation Hub Build') {
             steps {
                 runAutomationHubBuild testSuiteId: ''
             }
