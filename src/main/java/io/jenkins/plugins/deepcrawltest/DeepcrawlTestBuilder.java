@@ -11,6 +11,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.util.Secret;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -38,7 +39,7 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
 
   private final String testSuiteId;
   private String userKeyId;
-  private String userKeySecret;
+  private Secret userKeySecret;
   private boolean startOnly = false;
 
   @DataBoundConstructor
@@ -54,7 +55,7 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
     return this.userKeyId;
   }
 
-  public String getUserKeySecret() {
+  public Secret getUserKeySecret() { 
     return this.userKeySecret;
   }
 
@@ -73,7 +74,7 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
   }
 
   @DataBoundSetter
-  public void setUserKeySecret(String userKeySecret) {
+  public void setUserKeySecret(Secret userKeySecret) {
     this.userKeySecret = userKeySecret;
   }
 
@@ -119,7 +120,7 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
 
   private String[] getCommand(FilePath cliFile, String buildId, EnvVars env) {
     String userKeyId = this.userKeyId != null && !this.userKeyId.isEmpty() ? this.userKeyId : env.get("DEEPCRAWL_AUTOMATION_HUB_USER_KEY_ID", "");
-    String userKeySecret = this.userKeySecret != null && !this.userKeySecret.isEmpty() ? this.userKeySecret : env.get("DEEPCRAWL_AUTOMATION_HUB_USER_KEY_SECRET", "");
+    String userKeySecret = this.userKeySecret != null && !this.userKeySecret.getPlainText().isEmpty() ? this.userKeySecret.getPlainText() : env.get("DEEPCRAWL_AUTOMATION_HUB_USER_KEY_SECRET", "");
     String cliPath = "./" + cliFile.getName();
     String testSuiteIdArg = String.format("--testSuiteId=%s", this.testSuiteId);
     String userKeyIdArg = String.format("--userKeyId=%s", userKeyId);

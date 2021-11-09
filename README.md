@@ -12,21 +12,22 @@ The plugin can be used by executing it as follows in your Jenkinsfile:
 pipeline {
     agent any
 
-    // Can use environment variables for userKeyId and userKeySecret
-    // environment {
-    //     DEEPCRAWL_AUTOMATION_HUB_USER_KEY_ID = ''
-    //     DEEPCRAWL_AUTOMATION_HUB_USER_KEY_SECRET = ''
-    // }
+    environment {
+        DEEPCRAWL_AUTOMATION_HUB_USER_KEY_ID = ''
+        DEEPCRAWL_AUTOMATION_HUB_USER_KEY_SECRET = credentials('automation-hub-user-key-secret')
+    }
 
     stages {
         stage('Hello') {
             steps {
-                runAutomationHubBuild testSuiteId: '' userKeyId: '' userKeySecret: ''
+                runAutomationHubBuild testSuiteId: ''
             }
         }
     }
 }
 ```
+
+Note: You need to create a secret text named 'automation-hub-user-key-secret' using the Credentials Plugin in Jenkins.
 
 It can also be configured as a Build Step using the Jenkins GUI.
 

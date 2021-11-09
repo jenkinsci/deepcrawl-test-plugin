@@ -7,7 +7,7 @@
         <f:textbox />
     </f:entry>
     <f:entry title="User Key Secret" field="userKeySecret" description="Can also be set via DEEPCRAWL_AUTOMATION_HUB_USER_KEY_SECRET environment variable">
-        <f:textbox />
+        <f:password />
     </f:entry>
     <f:advanced>
         <f:entry title="Only start the build." field="startOnly" description="Only starts the build without polling for it to finish succesfully.">
