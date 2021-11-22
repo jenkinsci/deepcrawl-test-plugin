@@ -2,8 +2,9 @@
 # More Info: https://github.com/jenkinsci/.github/blob/master/.github/release-drafter.adoc
 
 on:
-  repository_dispatch:
-    types: [prerelease]
+  push:
+    branches:
+      - master
 
 jobs:
   update_release_draft:
@@ -13,5 +14,3 @@ jobs:
       - uses: release-drafter/release-drafter@v5.13.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          prerelease: true
