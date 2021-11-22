@@ -28,11 +28,9 @@
   </scm>
   
   <properties>
-    <credentials.version>1.22</credentials.version>
+    <credentials.version>2.6.2</credentials.version>
     <java.level>8</java.level>
-    <jenkins.workflow-api.version>2.40</jenkins.workflow-api.version>
-    <jenkins.junit.version>1.28</jenkins.junit.version>
-    <jenkins.version>2.282</jenkins.version>
+    <jenkins.workflow-api.version>2.42</jenkins.workflow-api.version>
   </properties>
   
   <repositories>
@@ -59,11 +57,6 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-api</artifactId>
       <version>${jenkins.workflow-api.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.plugins</groupId>
-      <artifactId>junit</artifactId>
-      <version>${jenkins.junit.version}</version>
     </dependency>
   </dependencies>
 </project>
