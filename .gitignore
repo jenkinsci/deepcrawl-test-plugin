@@ -1,2 +1,12 @@
 target
 work
+.DS_Store
+.factorypath
+.classpath
+.settings/
+.project
+/bin/
+
+# IntelliJ
+*.iml
+.idea
