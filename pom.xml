@@ -13,7 +13,7 @@
     <packaging>hpi</packaging>
     <properties>
         <revision>1.0.0</revision>
-        <jenkins.version>2.282</jenkins.version>
+        <jenkins.version>2.164.1</jenkins.version>
         <java.level>8</java.level>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     </properties>
@@ -31,12 +31,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>structs</artifactId>
-        </dependency>
-    </dependencies>
 
     <licenses>
         <license>
@@ -46,9 +40,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/${gitHubRepo}</connection>
-        <developerConnection>scm:git:https://github.com/${gitHubRepo}</developerConnection>
-        <url>https://github.com/${gitHubRepo}</url>
+        <connection>scm:git:https://github.com/jenkinsci/${project.artifactId}-plugin</connection>
+        <developerConnection>scm:git:https://github.com/jenkinsci/${project.artifactId}-plugin</developerConnection>
+        <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
         <tag>${scmTag}</tag>
     </scm>
 
