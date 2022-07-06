@@ -30,11 +30,11 @@ import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 
 public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
-  private final static String CLI_VERSION = "1.1.2";
+  private final static String CLI_VERSION = "1.1.3";
   private final static String CLI_DOWNLOAD_URL = "https://github.com/deepcrawl/deepcrawl-test/releases/download/v${cliVersion}/${cliFilename}";
   private final static Map<OperatingSystem, String> CLI_FILENAME = Stream.of(
     new AbstractMap.SimpleEntry<>(OperatingSystem.LINUX, "deepcrawl-test-linux"),
-    new AbstractMap.SimpleEntry<>(OperatingSystem.MACOS, "deepcrawl-test-macos"), 
+    new AbstractMap.SimpleEntry<>(OperatingSystem.MACOS, "deepcrawl-test-macos"),
     new AbstractMap.SimpleEntry<>(OperatingSystem.WINDOWS, "deepcrawl-test-win.exe")
   ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -56,7 +56,7 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
     return this.userKeyId;
   }
 
-  public Secret getUserKeySecret() { 
+  public Secret getUserKeySecret() {
     return this.userKeySecret;
   }
 
@@ -80,7 +80,7 @@ public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
   }
 
   @Override
-  public void perform(Run<?, ?> run, FilePath workspace, EnvVars env, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {  
+  public void perform(Run<?, ?> run, FilePath workspace, EnvVars env, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
     String buildId = run.getId();
     FilePath uniqueWorkspace = workspace.child(buildId);
     OperatingSystem os = this.getOperatingSystem(workspace, launcher);
