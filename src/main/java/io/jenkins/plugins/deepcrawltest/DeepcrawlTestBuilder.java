@@ -30,7 +30,7 @@ import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 
 public class DeepcrawlTestBuilder extends Builder implements SimpleBuildStep {
-  private final static String CLI_VERSION = "1.1.3";
+  private final static String CLI_VERSION = "1.1.4";
   private final static String CLI_DOWNLOAD_URL = "https://github.com/deepcrawl/deepcrawl-test/releases/download/v${cliVersion}/${cliFilename}";
   private final static Map<OperatingSystem, String> CLI_FILENAME = Stream.of(
     new AbstractMap.SimpleEntry<>(OperatingSystem.LINUX, "deepcrawl-test-linux"),
